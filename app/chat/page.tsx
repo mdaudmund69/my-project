@@ -215,28 +215,34 @@ const ChatPage = () => {
   return (
     <ProtectedRoute allowedRoles={["client", "lawyer"]}>
       <div className={`${theme === "dark" ? "dark" : ""}`}>
-        <div className="min-h-screen flex bg-white text-black dark:bg-[#0d0d0d] dark:text-gray-200 relative">
+        <div className="min-h-screen flex bg-white text-black dark:bg-[#0d0d0d] dark:text-gray-200 relative overflow-hidden">
           {/* Mobile overlay */}
-          {sidebarOpen && <div className="fixed inset-0 bg-black bg-opacity-50 z-40 lg:hidden" />}
+          {sidebarOpen && (
+            <div
+              className="fixed inset-0 bg-black/60 z-40 lg:hidden backdrop-blur-sm transition-opacity duration-300"
+              onClick={() => setSidebarOpen(false)}
+            />
+          )}
 
           {/* ────────────── sidebar ────────────── */}
           <aside
             id="sidebar"
             className={`
               fixed lg:relative inset-y-0 left-0 z-50 lg:z-auto
-              w-80 max-w-[85vw] lg:max-w-full
-              transform transition-transform duration-300 ease-in-out
+              w-80 max-w-[90vw] sm:max-w-[85vw] lg:max-w-full
+              transform transition-all duration-300 ease-out
               ${sidebarOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
               border-r border-gray-200 dark:border-gray-700 
-              bg-gray-50 dark:bg-[#111] 
-              flex flex-col
+              bg-gray-50/95 dark:bg-[#111]/95 backdrop-blur-sm
+              flex flex-col shadow-xl lg:shadow-none
             `}
           >
             {/* Mobile close button */}
-            <div className="lg:hidden flex justify-end p-4">
+            <div className="lg:hidden flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+              <h2 className="text-lg font-semibold">Chats</h2>
               <button
                 onClick={() => setSidebarOpen(false)}
-                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#222]"
+                className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-[#222] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -245,7 +251,7 @@ const ChatPage = () => {
             <div className="p-4 border-b border-gray-200 dark:border-gray-700">
               <button
                 onClick={() => createSession(prompt("Chat title?", "New Chat") || "New Chat")}
-                className="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 text-white py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 text-sm font-medium"
+                className="w-full bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-800 hover:to-slate-900 active:scale-[0.98] text-white py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 <MessageSquare className="w-4 h-4" />
                 New Chat
@@ -254,36 +260,44 @@ const ChatPage = () => {
 
             <div className="px-4 py-3">
               <div className="relative">
-                <Search className="w-4 h-4 absolute left-3 top-2.5 text-gray-400" />
+                <Search className="w-4 h-4 absolute left-3 top-3 text-gray-400" />
                 <input
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search chats..."
-                  className="w-full bg-gray-100 dark:bg-[#1d1d1d] pl-9 pr-3 py-2 rounded-md focus:outline-none text-sm"
+                  className="w-full bg-gray-100 dark:bg-[#1d1d1d] pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 text-sm transition-all duration-200 border border-transparent hover:border-gray-300 dark:hover:border-gray-600"
                 />
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto px-2">
               {filtered.map((s) => (
                 <div
                   key={s.id}
-                  className={`group flex items-start px-4 py-3 cursor-pointer hover:bg-gray-200 dark:hover:bg-[#222] transition-colors ${
-                    currentId === s.id ? "bg-gray-200 dark:bg-[#222]" : ""
+                  className={`group flex items-start mx-2 mb-1 px-3 py-3 cursor-pointer rounded-xl transition-all duration-200 ${
+                    currentId === s.id
+                      ? "bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800"
+                      : "hover:bg-gray-100 dark:hover:bg-[#222] border border-transparent"
                   }`}
                   onClick={() => selectSession(s)}
                 >
                   <div className="flex-1 min-w-0 pr-2">
-                    <p className="font-medium truncate text-sm">{s.title}</p>
-                    <p className="text-xs text-gray-500 truncate mt-0.5">{s.lastMessage}</p>
+                    <p
+                      className={`font-medium truncate text-sm leading-5 ${
+                        currentId === s.id ? "text-blue-700 dark:text-blue-300" : ""
+                      }`}
+                    >
+                      {s.title}
+                    </p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 truncate mt-1 leading-4">{s.lastMessage}</p>
                   </div>
-                  <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         deleteSession(s.id)
                       }}
-                      className="text-red-500 hover:text-red-700 p-1 rounded"
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 p-1.5 rounded-lg transition-all duration-200"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -292,10 +306,10 @@ const ChatPage = () => {
               ))}
             </div>
 
-            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center">
+            <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50/50 dark:bg-[#111]/50">
               <button
                 onClick={toggleTheme}
-                className="p-2 rounded hover:bg-gray-200 dark:hover:bg-[#222] transition-colors"
+                className="p-2.5 rounded-xl hover:bg-gray-200 dark:hover:bg-[#222] transition-all duration-200 hover:scale-105"
                 title="Toggle theme"
               >
                 {theme === "dark" ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -305,10 +319,10 @@ const ChatPage = () => {
                   logout()
                   router.push("/")
                 }}
-                className="flex items-center gap-1 text-sm text-red-600 hover:text-red-800 transition-colors"
+                className="flex items-center gap-2 text-sm text-red-600 hover:text-red-800 hover:bg-red-50 dark:hover:bg-red-900/20 px-3 py-2 rounded-xl transition-all duration-200"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Log out</span>
+                <span className="hidden sm:inline font-medium">Log out</span>
               </button>
             </div>
           </aside>
@@ -316,20 +330,20 @@ const ChatPage = () => {
           {/* ────────────── chat panel ────────────── */}
           <main className="flex-1 flex flex-col min-w-0">
             {/* header */}
-            <header className="h-14 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 lg:px-6 justify-between bg-white dark:bg-[#0d0d0d]">
+            <header className="h-16 lg:h-14 border-b border-gray-200 dark:border-gray-700 flex items-center px-4 lg:px-6 justify-between bg-white/95 dark:bg-[#0d0d0d]/95 backdrop-blur-sm">
               <div className="flex items-center gap-3 min-w-0 flex-1">
                 <button
                   id="menu-button"
                   onClick={() => setSidebarOpen(true)}
-                  className="lg:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#222] transition-colors"
+                  className="lg:hidden p-2.5 rounded-xl hover:bg-gray-100 dark:hover:bg-[#222] transition-all duration-200 hover:scale-105"
                 >
                   <Menu className="w-5 h-5" />
                 </button>
-                <h1 className="font-semibold truncate text-sm lg:text-base">
+                <h1 className="font-semibold truncate text-base lg:text-lg text-gray-900 dark:text-gray-100">
                   {sessions.find((s) => s.id === currentId)?.title || "Chat"}
                 </h1>
               </div>
-              <label className="cursor-pointer inline-flex items-center gap-1 text-sm hover:bg-gray-100 dark:hover:bg-[#222] px-2 py-1 rounded transition-colors">
+              <label className="cursor-pointer inline-flex items-center gap-2 text-sm hover:bg-gray-100 dark:hover:bg-[#222] px-3 py-2 rounded-xl transition-all duration-200 font-medium">
                 <UploadCloud className="w-4 h-4" />
                 <span className="hidden sm:inline">Upload</span>
                 <input type="file" onChange={handleFile} className="hidden" accept=".txt,.md,.pdf,.doc,.docx" />
@@ -337,14 +351,14 @@ const ChatPage = () => {
             </header>
 
             {/* messages */}
-            <section className="flex-1 overflow-y-auto px-4 lg:px-6 py-4 space-y-4">
+            <section className="flex-1 overflow-y-auto px-4 lg:px-6 py-6 space-y-6">
               {messages.map((m) => (
                 <div key={m.id} className={`flex ${m.sender === "user" ? "justify-end" : "justify-start"}`}>
                   <div
-                    className={`rounded-lg px-3 lg:px-4 py-2 max-w-[85%] lg:max-w-xs whitespace-pre-line text-sm lg:text-base ${
+                    className={`rounded-2xl px-4 py-3 max-w-[80%] sm:max-w-[75%] lg:max-w-md whitespace-pre-line text-sm lg:text-base leading-relaxed shadow-sm ${
                       m.sender === "user"
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 dark:bg-[#222] text-gray-900 dark:text-gray-100"
+                        ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-blue-200 dark:shadow-blue-900/30"
+                        : "bg-white dark:bg-[#1a1a1a] text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-700 shadow-gray-100 dark:shadow-gray-900/30"
                     }`}
                   >
                     {m.text}
@@ -354,8 +368,8 @@ const ChatPage = () => {
 
               {isTyping && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-200 dark:bg-[#222] rounded-lg px-3 lg:px-4 py-2 text-sm lg:text-base">
-                    <span className="animate-pulse">Mentor is typing…</span>
+                  <div className="bg-white dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3 text-sm lg:text-base shadow-sm">
+                    <span className="animate-pulse text-gray-600 dark:text-gray-400">Mentor is typing…</span>
                   </div>
                 </div>
               )}
@@ -366,30 +380,32 @@ const ChatPage = () => {
             {/* input */}
             <form
               onSubmit={handleSubmit}
-              className="border-t border-gray-200 dark:border-gray-700 p-4 lg:p-4 bg-white dark:bg-[#0d0d0d]"
+              className="border-t border-gray-200 dark:border-gray-700 p-4 lg:p-6 bg-white/95 dark:bg-[#0d0d0d]/95 backdrop-blur-sm"
             >
-              <div className="flex items-end gap-2 lg:gap-3">
-                <textarea
-                  ref={textareaRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  rows={1}
-                  placeholder="Type your message…"
-                  className="flex-1 resize-none bg-gray-100 dark:bg-[#1d1d1d] rounded-lg p-3 focus:outline-none max-h-32 text-sm lg:text-base"
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && !e.shiftKey) {
-                      e.preventDefault()
-                      handleSubmit(e)
-                    }
-                  }}
-                />
+              <div className="flex items-end gap-3 max-w-4xl mx-auto">
+                <div className="flex-1 relative">
+                  <textarea
+                    ref={textareaRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    rows={1}
+                    placeholder="Type your message…"
+                    className="w-full resize-none bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-gray-700 rounded-2xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 max-h-32 text-sm lg:text-base transition-all duration-200 placeholder-gray-500 dark:placeholder-gray-400"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && !e.shiftKey) {
+                        e.preventDefault()
+                        handleSubmit(e)
+                      }
+                    }}
+                  />
+                </div>
                 <button
                   type="submit"
                   disabled={!input.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white px-3 lg:px-4 py-3 rounded-lg flex items-center gap-1 disabled:opacity-50 shrink-0 transition-colors text-sm lg:text-base font-medium"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white px-4 lg:px-5 py-3.5 rounded-2xl flex items-center gap-2 disabled:opacity-50 shrink-0 transition-all duration-200 font-medium shadow-lg hover:shadow-xl active:scale-95 min-w-[60px] justify-center"
                 >
                   <span className="hidden sm:inline">Send</span>
-                  <span className="sm:hidden">→</span>
+                  <span className="sm:hidden text-lg">→</span>
                 </button>
               </div>
             </form>
